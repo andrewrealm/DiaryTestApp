@@ -88,6 +88,34 @@ class OnboardingModel {
             measurementUnit = .imperial
         }
     }
+
+    func dcbCalculator() -> String {
+        guard let dob = dob else {
+            return "Please enter your date of birth."
+        }
+        guard !weight.isZero else {
+            return "Please enter your weight."
+        }
+
+        let PA = 1.0
+        let ageInYears = dob.timeIntervalSinceNow / 31_536_000
+        let weightInKg = measurementUnit == .imperial ? LocaleService.shared.toMetricWeight(weight) : weight
+        let heightInMeters = (height == 0 ? 170 : height) / 100
+        let measurementUnitString = measurementUnit == .imperial ? "" : "kJ"
+
+        switch gender {
+        case .male:
+            // 662 - 9.53 x ageInYears + PA x (15.91 x weightInKg + 539.6 x heightInMeters)
+            let value = 662 - 9.53 * ageInYears + PA * (15.91 * weightInKg + 539.6 * heightInMeters)
+            return String(format: "%.1f %@", value, measurementUnitString)
+        case .female:
+            // 354 - 6.91 x ageInYears + PA x (9.36 x weightInKg + 726 x heightInMeters)
+            let value = 354 - 6.91 * ageInYears + PA * (9.36 * weightInKg + 726 * heightInMeters)
+            return String(format: "%.1f %@", value, measurementUnitString)
+        default:
+            return "Unable to calculate to unknown gender."
+        }
+    }
 }
 
 extension OnboardingModel {

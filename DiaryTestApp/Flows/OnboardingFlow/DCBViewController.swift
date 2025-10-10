@@ -2,42 +2,52 @@ import UIKit
 
 class DCBViewController: BaseOnboardingViewController {
 
-    let welcomeLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Daily Calorie Budget"
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-
-    lazy var btnNext = {
-        let btn = UIButton(type: .system)
-        btn.setTitle("Next", for: .normal)
-        btn.setTitleColor(.white, for: .normal)
-        btn.backgroundColor = .systemOrange
-        btn.layer.cornerRadius = 10
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.addTarget(self, action: #selector(onNext), for: .touchUpInside)
-        return btn
-    }()
+    var dcbValueLabelRef: UILabel = UILabel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         self.title = "Daily Calorie Budget"
 
-        view.addSubview(welcomeLabel)
-        view.addSubview(btnNext)
+        setupUI()
+     }
 
-        NSLayoutConstraint.activate([
-            welcomeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            welcomeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            btnNext.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            btnNext.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            btnNext.widthAnchor.constraint(equalToConstant: 100),
-            btnNext.heightAnchor.constraint(equalToConstant: 44)
-        ])
-    }
+     override func viewDidAppear(_ animated: Bool) {
+         super.viewDidAppear(animated)
+
+         updateUI()
+     }
+
+     func updateUI() {
+         if let model = model {
+             dcbValueLabelRef.text = model.dcbCalculator()
+         }
+     }
+
+     func setupUI() {
+
+         let dcbPromptLabel = UIComponentsFactory.makeLabel(text: "Your Daily Calorie Budget")
+         view.addSubview(dcbPromptLabel)
+
+         dcbValueLabelRef = UIComponentsFactory.makeLabel(text: "")
+         view.addSubview(dcbValueLabelRef)
+
+         let btnNext = UIComponentsFactory.makePanelButton(title: "Next", width: 120)
+         btnNext.addTarget(self, action: #selector(onNext), for: .touchUpInside)
+
+         let bottomPanel = UIComponentsFactory.makeHStackWithButtons(buttons: [btnNext])
+         view.addSubview(bottomPanel)
+
+         NSLayoutConstraint.activate([
+            dcbPromptLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            dcbPromptLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -70),
+            dcbValueLabelRef.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            dcbValueLabelRef.centerYAnchor.constraint(equalTo: dcbPromptLabel.bottomAnchor, constant: 20),
+             bottomPanel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+             bottomPanel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+             bottomPanel.widthAnchor.constraint(equalToConstant: 150)
+         ])
+     }
 
     @objc
     func onNext() {

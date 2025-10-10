@@ -4,23 +4,20 @@ class OnboardingCoordinator {
     weak var parentCoordinator: RootCoordinatorProtocol?
 
     var navigationController: UINavigationController
-    var onboardingModel: OnboardingModel = OnboardingModel.emptyModel()
+    var onboardingModel: OnboardingViewModel = OnboardingViewModel(model: OnboardingModel.emptyModel(),
+                                                                   healthDataReader: HealthDataReader(localeService: LocaleService(),
+                                                                                                      healthStoreService: HealthStoreService()))
 
-    private var dataReader: DataReader?
+    private var dataReader: HealthDataReader?
 
     init(parent: RootCoordinatorProtocol, navi: UINavigationController) {
         self.parentCoordinator = parent
         self.navigationController = navi
     }
-
-    private func updateDataReader() {
-        dataReader = DataReader(measurementUnit: LocaleService.shared.measuremenUnit, healthStoreService: HealthStoreService())
-    }
 }
 
 extension OnboardingCoordinator: FlowCoordinatorProtocol {
     func start() {
-        updateDataReader()
         onBeginSelected()
     }
 
@@ -45,7 +42,6 @@ extension OnboardingCoordinator: OnboardingFlowProtocol {
     func onGenderSelected() {
         let dataImportVC = DataImportViewController(coordinator: self)
         dataImportVC.model = onboardingModel
-        dataImportVC.dataReader = dataReader
         navigationController.pushViewController(dataImportVC, animated: true)
     }
 

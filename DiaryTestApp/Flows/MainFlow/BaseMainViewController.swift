@@ -3,7 +3,7 @@ import UIKit
 class BaseMainViewController: UIViewController {
     weak var coordinator: MainCoordinator?
 
-    var model: OnboardingModel?
+    var model: OnboardingViewModel?
 
     init(coordinator: MainCoordinator? = nil) {
         self.coordinator = coordinator

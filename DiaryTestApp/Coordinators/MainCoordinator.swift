@@ -3,7 +3,7 @@ import UIKit
 class MainCoordinator {
     weak var parentCoordinator: RootCoordinatorProtocol?
     var navigationController: UINavigationController
-    var onboardingModel: OnboardingModel?
+    var onboardingModel: OnboardingViewModel?
 
     init(parent: RootCoordinatorProtocol, navi: UINavigationController) {
         self.parentCoordinator = parent

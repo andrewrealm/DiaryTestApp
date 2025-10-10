@@ -16,7 +16,7 @@ class GenderViewController: BaseOnboardingViewController {
         view.addSubview(selectGenderLabel)
 
         let names = Gender.allCases.map({ $0.stringValue })
-        let selectedIndex = model?.gender.intValue ?? 0
+        let selectedIndex = model?.gender.rawValue ?? 0
         let genderSelector = UIComponentsFactory.makeSelector(with: names, selectedIndex: selectedIndex)
         genderSelector.addTarget(self, action: #selector(onGenderSelected(_:)), for: .valueChanged)
         view.addSubview(genderSelector)

@@ -20,11 +20,8 @@ class DOBSelectionViewController: BaseOnboardingViewController {
     }
 
     func updateUI() {
-        if let model = model, let modelDob = model.dob {
-            let dob = modelDob// ?? Date().addingTimeInterval(-409_968_000)
-            let age = Date().timeIntervalSince(dob)
-            let ageString = String(format: "%.0f", age / 31_536_000)
-            ageLabelRef.text = ageString
+        if let model = model {
+            ageLabelRef.text = model.ageAsString()
         }
     }
 
@@ -39,8 +36,8 @@ class DOBSelectionViewController: BaseOnboardingViewController {
         datePickerRef = UIDatePicker()
         datePickerRef.datePickerMode = .date
         datePickerRef.preferredDatePickerStyle = .wheels
-        datePickerRef.minimumDate = Date().addingTimeInterval(-3_153_600_000) // 100 years
-        datePickerRef.maximumDate = Date().addingTimeInterval(-409_968_000) // 13 years
+        datePickerRef.minimumDate = TimeConstants.minDateAllowed
+        datePickerRef.maximumDate = TimeConstants.maxDateAllowed
         datePickerRef.addTarget(self, action: #selector(onDateChanged), for: .valueChanged)
         datePickerRef.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(datePickerRef)

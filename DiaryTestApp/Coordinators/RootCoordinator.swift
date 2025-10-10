@@ -10,7 +10,6 @@ class RootCoordinator: RootCoordinatorProtocol {
     var navigationController: UINavigationController
 
     private var currentFlow: FlowCoordinatorProtocol?
-    private var onboardingModel: OnboardingModel = OnboardingModel.emptyModel()
 
     init(navi: UINavigationController) {
         self.navigationController = navi

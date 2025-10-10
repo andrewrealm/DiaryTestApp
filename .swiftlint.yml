@@ -1,0 +1,69 @@
+disabled_rules:
+  - comment_spacing
+  - no_space_in_method_call
+  - unused_closure_parameter
+  - large_tuple
+opt_in_rules:
+  - attributes
+  - closure_end_indentation
+  - closure_spacing
+  - conditional_returns_on_newline
+  - empty_count
+  - explicit_init
+  - fatal_error_message
+  - first_where
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - nimble_operator
+  - operator_usage_whitespace
+  - overridden_super_call
+  - private_outlet
+  - prohibited_super_call
+  - redundant_nil_coalescing
+  - switch_case_on_newline
+  - identifier_name
+included:
+excluded:
+  - Carthage
+  - Pods
+
+empty_count:
+    severity: warning
+opening_brace:
+    severity: warning
+trailing_whitespace:
+  severity: warning
+function_name_whitespace:
+  severity: warning
+colon:
+  severity: error
+vertical_whitespace:
+  severity: warning
+unused_closure_parameter:
+  severity: error
+force_try:
+  severity: error
+type_body_length:
+  warning: 150
+  error: 250
+function_body_length:
+  warning: 30
+  error: 45
+cyclomatic_complexity:
+  warning: 5
+  error: 10
+nesting:
+  type_level:
+    warning: 3
+    error: 6
+function_parameter_count:
+  warning: 5
+  error: 7
+file_length:
+  warning: 300
+  error: 450
+line_length:
+  warning: 250
+  error: 300
+identifier_name:
+  allowed_symbols: "_"

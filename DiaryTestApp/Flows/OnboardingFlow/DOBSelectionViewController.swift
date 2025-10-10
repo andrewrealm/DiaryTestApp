@@ -20,8 +20,8 @@ class DOBSelectionViewController: BaseOnboardingViewController {
     }
 
     func updateUI() {
-        if let model = model {
-            let dob = model.dob ?? Date().addingTimeInterval(-409_968_000)
+        if let model = model, let modelDob = model.dob {
+            let dob = modelDob// ?? Date().addingTimeInterval(-409_968_000)
             let age = Date().timeIntervalSince(dob)
             let ageString = String(format: "%.0f", age / 31_536_000)
             ageLabelRef.text = ageString

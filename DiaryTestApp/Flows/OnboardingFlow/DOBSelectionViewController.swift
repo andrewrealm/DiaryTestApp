@@ -2,41 +2,76 @@ import UIKit
 
 class DOBSelectionViewController: BaseOnboardingViewController {
 
-    let welcomeLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Date of Birth!"
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-
-    lazy var btnNext = {
-        let btn = UIButton(type: .system)
-        btn.setTitle("Next", for: .normal)
-        btn.setTitleColor(.white, for: .normal)
-        btn.backgroundColor = .systemOrange
-        btn.layer.cornerRadius = 10
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.addTarget(self, action: #selector(onNext), for: .touchUpInside)
-        return btn
-    }()
+    var ageLabelRef: UILabel = UILabel()
+    var datePickerRef: UIDatePicker = UIDatePicker()
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.title = "Date of Birth"
+        self.title = "Day of Birth"
 
-        view.addSubview(welcomeLabel)
-        view.addSubview(btnNext)
+       setupUI()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        updateUI()
+    }
+
+    func updateUI() {
+        if let model = model {
+            ageLabelRef.text = model.ageAsString()
+        }
+    }
+
+    func setupUI() {
+
+        let agePromptLabel = UIComponentsFactory.makeLabel(text: "Please, enter your age")
+        view.addSubview(agePromptLabel)
+
+        ageLabelRef = UIComponentsFactory.makeLabel(text: "age")
+        view.addSubview(ageLabelRef)
+
+        datePickerRef = UIDatePicker()
+        datePickerRef.datePickerMode = .date
+        datePickerRef.preferredDatePickerStyle = .wheels
+        datePickerRef.minimumDate = TimeConstants.minDateAllowed
+        datePickerRef.maximumDate = TimeConstants.maxDateAllowed
+        datePickerRef.addTarget(self, action: #selector(onDateChanged), for: .valueChanged)
+        datePickerRef.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(datePickerRef)
+
+        let ageRestrictionLabelRef = UIComponentsFactory.makeLabel(text: "† Age restriction apply")
+        ageRestrictionLabelRef.textColor = .gray
+        ageRestrictionLabelRef.font = UIFont.systemFont(ofSize: 13, weight: .light)
+        view.addSubview(ageRestrictionLabelRef)
+
+        let btnNext = UIComponentsFactory.makePanelButton(title: "Next", width: 120)
+        btnNext.addTarget(self, action: #selector(onNext), for: .touchUpInside)
+
+        let bottomPanel = UIComponentsFactory.makeHStackWithButtons(buttons: [btnNext])
+        view.addSubview(bottomPanel)
 
         NSLayoutConstraint.activate([
-            welcomeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            welcomeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            btnNext.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            btnNext.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            btnNext.widthAnchor.constraint(equalToConstant: 100),
-            btnNext.heightAnchor.constraint(equalToConstant: 44)
+            agePromptLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            agePromptLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -70),
+            ageLabelRef.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            ageLabelRef.topAnchor.constraint(equalTo: agePromptLabel.bottomAnchor, constant: 20),
+            datePickerRef.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            datePickerRef.topAnchor.constraint(equalTo: ageLabelRef.bottomAnchor, constant: 20),
+            ageRestrictionLabelRef.centerXAnchor.constraint(equalTo: datePickerRef.centerXAnchor),
+            ageRestrictionLabelRef.topAnchor.constraint(equalTo: datePickerRef.bottomAnchor, constant: 10),
+            bottomPanel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            bottomPanel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            bottomPanel.widthAnchor.constraint(equalToConstant: 150)
         ])
+    }
+
+    @objc
+    func onDateChanged() {
+        model?.dob = datePickerRef.date
+        updateUI()
     }
 
     @objc

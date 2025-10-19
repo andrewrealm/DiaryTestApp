@@ -21,8 +21,8 @@ class WeightSelectionViewController: BaseOnboardingViewController {
 
     func updateUI() {
         if let model = model {
-            weightLabelRef.text = LocaleService.shared.weightLabel(for: model.measurementUnit)
-            textFieldRef.text = model.weight.description
+            weightLabelRef.text = model.weightUnitAsString()
+            textFieldRef.text = model.weightAsString()
         }
     }
 }
@@ -58,7 +58,7 @@ extension WeightSelectionViewController {
         textFieldRef.autocorrectionType = .no
         view.addSubview(textFieldRef)
 
-        weightLabelRef = UIComponentsFactory.makeLabel(text: LocaleService.shared.weightLabel(for: model?.measurementUnit ?? .imperial))
+        weightLabelRef = UIComponentsFactory.makeLabel(text: model?.weightAsString() ?? "")
         view.addSubview(weightLabelRef)
 
         NSLayoutConstraint.activate([
@@ -115,7 +115,7 @@ extension WeightSelectionViewController: UITextFieldDelegate {
 
     func textFieldDidBeginEditing(_ textField: UITextField) {
         if let model = model {
-            textField.text = model.weight.description
+            textField.text = model.weightAsString()
         }
     }
 

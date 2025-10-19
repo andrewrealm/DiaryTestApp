@@ -1,11 +1,16 @@
 import Foundation
 
-final class LocaleService {
+/// Kind of measurement units
+///
+enum MeasurementUnit {
+    case imperial, metric
+}
 
-    static let shared = LocaleService()
-
-    private init() {
-    }
+/// Lightweight locale Units Assistant. Provides a convenient way to work with the user's locale's units of measurement.
+///
+/// - TODO: Add locale notification changes handler so we can always know actual state
+///
+struct LocaleService {
 
     private let numberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
@@ -24,6 +29,13 @@ final class LocaleService {
 // MARK: - Units
 extension LocaleService {
 
+    func currentLocale() -> Locale {
+        Locale.current
+    }
+
+    /// Metric measurement test
+    ///
+    ///  - Returns: `true` if the user's local unit system is `metric`, and `false` otherwise.
     var isMetric: Bool {
         switch Locale.current.measurementSystem {
         case .us, .uk:
@@ -33,6 +45,10 @@ extension LocaleService {
         }
     }
 
+    /// The user's unit measurement system
+    ///
+    /// - Returns: The `MeasurementUnit` type.
+    ///
     var measuremenUnit: MeasurementUnit {
         switch Locale.current.measurementSystem {
         case .us, .uk:
@@ -42,6 +58,10 @@ extension LocaleService {
         }
     }
 
+    /// Unit of weight measurement depending on the user's locale
+    ///
+    ///  - Returns: Formatted `weight`measurement string
+    ///
     func weightLabel(for unit: MeasurementUnit) -> String {
         let label: String
         switch unit {
@@ -53,6 +73,10 @@ extension LocaleService {
         return label
     }
 
+    /// Unit of length measurement depending on the user's locale
+    ///
+    ///  - Returns: Formatted `height`measurement string
+    ///
     func lenghtLabel(for unit: MeasurementUnit) -> String {
         let label: String
         switch unit {
@@ -88,13 +112,13 @@ extension LocaleService {
 // MARK: - Formatters
 extension LocaleService {
 
-    func formatNumber(_ number: Double) -> String {
-        numberFormatter.locale = Locale.current
-        return numberFormatter.string(from: NSNumber(value: number)) ?? ""
-    }
-
-    func formatDate(_ dateString: String) -> Date? {
-        iso8601DateFormatter.locale = Locale.current
-        return iso8601DateFormatter.date(from: dateString)
-    }
+//    func formatNumber(_ number: Double) -> String {
+//        numberFormatter.locale = Locale.current
+//        return numberFormatter.string(from: NSNumber(value: number)) ?? ""
+//    }
+//
+//    func formatDate(_ dateString: String) -> Date? {
+//        iso8601DateFormatter.locale = Locale.current
+//        return iso8601DateFormatter.date(from: dateString)
+//    }
 }

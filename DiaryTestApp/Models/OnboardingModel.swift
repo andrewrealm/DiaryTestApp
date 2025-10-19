@@ -1,9 +1,9 @@
 import Foundation
 
-/// Possible conversions from Int: 0, 1, 2
+/// By default we support only 'base' gender variations
 ///
-enum Gender {
-    case unknown, male, female
+enum Gender: Int {
+    case unknown = 0, male, female
 
     init?(gender: Int) {
         switch gender {
@@ -15,17 +15,6 @@ enum Gender {
             self = .female
         default:
             return nil
-        }
-    }
-
-    var intValue: Int {
-        switch self {
-        case .unknown:
-            return 0
-        case .male:
-            return 1
-        case .female:
-            return 2
         }
     }
 
@@ -42,36 +31,27 @@ enum Gender {
 }
 
 extension Gender: CaseIterable {
+
     static var allCases: [Gender] {
         [.unknown, .male, .female]
     }
 }
 
-class OnboardingModel {
+struct OnboardingModel {
+    /// Local measurements unit
     var measurementUnit: MeasurementUnit
-    var gender: Gender
-    var height: Double
-    var dob: Date?
 
-    private var _weight: Double = 0
-    var weight: Double {
-        get {
-            switch measurementUnit {
-            case .imperial:
-                return LocaleService.shared.toImperialWeight(_weight)
-            case .metric:
-                return _weight
-            }
-        }
-        set {
-            switch measurementUnit {
-            case .imperial:
-                _weight = LocaleService.shared.toMetricWeight(newValue)
-            case .metric:
-                _weight = newValue
-            }
-        }
-    }
+    /// User's gender
+    var gender: Gender
+
+    /// User's height in 'centimeters'
+    var height: Double
+
+    /// User's weight in 'kilograms'
+    var weight: Double = 0
+
+    /// User's date of birth
+    var dob: Date?
 
     init(gender: Gender, weight: Double, height: Double, dob: Date? = nil, measurementUnit: MeasurementUnit? = nil) {
         self.measurementUnit = measurementUnit ?? .imperial
@@ -80,21 +60,13 @@ class OnboardingModel {
         self.height = height
         self.weight = weight
     }
-
-    func toggleMeasurementUnit() {
-        if measurementUnit == .imperial {
-            measurementUnit = .metric
-        } else {
-            measurementUnit = .imperial
-        }
-    }
 }
 
 extension OnboardingModel {
     static func emptyModel() -> OnboardingModel {
-        return OnboardingModel(gender: .male, weight: 0, height: 0, measurementUnit: LocaleService.shared.measuremenUnit)
+        return OnboardingModel(gender: .male, weight: 0, height: 0, measurementUnit: .imperial)
     }
-
+/*
     static func draftFrom(model: OnboardingModel?) -> OnboardingModel {
         guard let model = model else {
             return emptyModel()
@@ -106,4 +78,5 @@ extension OnboardingModel {
                                dob: model.dob,
                                measurementUnit: model.measurementUnit)
     }
+ */
 }

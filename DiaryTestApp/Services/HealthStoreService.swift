@@ -83,7 +83,7 @@ extension HealthStoreService: HealthStoreServiceProtocol {
             )
 
             let query = HKSampleQuery(sampleType: quantityType, predicate: predicate, limit: 1, sortDescriptors: [sortDescriptor]) { _, samples, error in
-                guard nil != error else {
+                guard nil == error else {
                     let errMessage = error?.localizedDescription ?? "Unknown error"
                     completion(.failure(HealthServiceError.unableToreadSamples(errMessage)))
                     return

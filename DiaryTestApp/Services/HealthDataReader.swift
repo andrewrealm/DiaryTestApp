@@ -4,53 +4,56 @@ import HealthKit
 enum DataReaderError: Error {
     case unableToReadHealthData(String)
 }
+typealias HealthDataReaderCompletion = (Result<HealthData, Error>) -> Void
 
-enum MeasurementUnit {
-    case imperial, metric
+protocol HealthDataReaderProtocol {
+
+    /// The resultt of the operation will be returned in `Main` thread
+    /// 
+    func readHealthData(completion: @escaping HealthDataReaderCompletion)
 }
 
+/// Health data collection helper
+///
 struct HealthData {
-    var measurementUnit: MeasurementUnit = .metric
-    var height: Double = 170 // In cm
+    var height: Double = 0 // In cm
     var weight: Double = 0 // In kg
     var sex: Gender = .unknown
     var dob: Date = Date.distantPast
 
+    /// Test for required data
+    ///
     var isValid: Bool {
         weight != 0 && sex != .unknown && dob != Date.distantPast
     }
 }
 
-typealias HealthDataReaderCompletion = (Result<HealthData, Error>) -> Void
-
-protocol DataReaderProtocol {
-    func readHealthData(completion: @escaping HealthDataReaderCompletion)
-}
-
-class DataReader {
+/// The `HealthStoreService` wrapper. Removes data reading boilerplate from code.
+///
+class HealthDataReader {
     private let healthStoreService: HealthStoreServiceProtocol
-    private let measurementUnit: MeasurementUnit
+    private let localeService: LocaleService
 
-    init(measurementUnit: MeasurementUnit, healthStoreService: HealthStoreServiceProtocol) {
-        self.measurementUnit = measurementUnit
+    init(localeService: LocaleService, healthStoreService: HealthStoreServiceProtocol) {
+        self.localeService = localeService
         self.healthStoreService = healthStoreService
     }
 
-    func quantityTypesToRead() -> [HKQuantityTypeIdentifier] {
+    private func quantityTypesToRead() -> [HKQuantityTypeIdentifier] {
         [
             .height,
             .bodyMass
         ]
     }
 
-    func characterTypesToRead() -> [HKCharacteristicTypeIdentifier] {
+    private func characterTypesToRead() -> [HKCharacteristicTypeIdentifier] {
         [
             .biologicalSex,
             .dateOfBirth
         ]
     }
 
-    func requestPermissions(_ completion: @escaping HealthStorePermissionRequestCompletion) {
+    private func requestPermissions(_ completion: @escaping HealthStorePermissionRequestCompletion) {
         let quantityObjects = quantityTypesToRead().map({ HKQuantityType($0) })
         let characterObjects = characterTypesToRead().map({ HKCharacteristicType($0) })
 
@@ -67,7 +70,7 @@ class DataReader {
         }
     }
 
-    func requestData(_ completion: @escaping HealthDataReaderCompletion) {
+    private func requestData(_ completion: @escaping HealthDataReaderCompletion) {
         DispatchQueue.global(qos: .utility).async { [weak self] in
             guard let strongSelf = self else {
                 completion(.failure(DataReaderError.unableToReadHealthData("Internal reader error.")))
@@ -75,7 +78,7 @@ class DataReader {
             }
             let group = DispatchGroup()
 
-            var healthData: HealthData = HealthData(measurementUnit: strongSelf.measurementUnit)
+            var healthData: HealthData = HealthData()
 
             strongSelf.quantityTypesToRead().forEach { type in
                 group.enter()
@@ -115,8 +118,8 @@ class DataReader {
 }
 
 // MARK: - Parsing
-extension DataReader {
-    func parseSample(_ sample: HKQuantitySample?, for type: HKQuantityTypeIdentifier, to model: inout HealthData) {
+extension HealthDataReader {
+    private func parseSample(_ sample: HKQuantitySample?, for type: HKQuantityTypeIdentifier, to model: inout HealthData) {
         guard let sample else {
             return
         }
@@ -125,44 +128,29 @@ extension DataReader {
         case HKQuantityTypeIdentifier.height:
             let height = heightFrom(sample)
             model.height = height
-            print("Height: \(height)")
 
         case HKQuantityTypeIdentifier.bodyMass:
             let weight = weightFrom(sample)
             model.weight = weight
-            print("Weight: \(weight)")
+
         default:
             return
         }
     }
 
-    func heightFrom(_ sample: HKQuantitySample) -> Double {
-        var hkUnit: HKUnit
-        switch measurementUnit {
-        case .imperial:
-            hkUnit = HKUnit.inch()
-        case .metric:
-            hkUnit = HKUnit.meter()
-        }
-        let height = sample.quantity.doubleValue(for: hkUnit)
+    private func heightFrom(_ sample: HKQuantitySample) -> Double {
+        let hkUnit: HKUnit = localeService.isMetric ? HKUnit.meterUnit(with: .centi) : HKUnit.inch()
 
-        return height
+        return sample.quantity.doubleValue(for: hkUnit)
     }
 
-    func weightFrom(_ sample: HKQuantitySample) -> Double {
-        var hkUnit: HKUnit
-        switch measurementUnit {
-        case .imperial:
-            hkUnit = HKUnit.pound()
-        case .metric:
-            hkUnit = HKUnit.gramUnit(with: .kilo)
-        }
-        let weight = sample.quantity.doubleValue(for: hkUnit)
+    private func weightFrom(_ sample: HKQuantitySample) -> Double {
+        let hkUnit: HKUnit = localeService.isMetric ? HKUnit.gramUnit(with: .kilo) : HKUnit.pound()
 
-        return weight
+        return sample.quantity.doubleValue(for: hkUnit)
     }
 
-    func genderFrom(_ sample: HKBiologicalSex?) -> Gender {
+    private func genderFrom(_ sample: HKBiologicalSex?) -> Gender {
         switch sample {
         case .male:
             return .male
@@ -173,16 +161,18 @@ extension DataReader {
         }
     }
 
-    func dobleFrom(_ value: DateComponents?) -> Date {
+    private func dobleFrom(_ value: DateComponents?) -> Date {
         guard let dateComponents = value else {
             return Date.distantPast
         }
 
-        return Calendar.current.date(from: dateComponents)!
+        let date = Calendar.current.date(from: dateComponents)
+
+        return date ?? Date.distantPast
     }
 }
 
-extension DataReader: DataReaderProtocol {
+extension HealthDataReader: HealthDataReaderProtocol {
     func readHealthData(completion: @escaping HealthDataReaderCompletion) {
         requestPermissions { [weak self] result in
             guard case .success(let granted) = result, granted else {

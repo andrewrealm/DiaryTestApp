@@ -26,6 +26,8 @@ included:
 excluded:
   - Carthage
   - Pods
+  - Demo
+  - DiaryTestAppTests
 
 empty_count:
     severity: warning
@@ -67,3 +69,4 @@ line_length:
   error: 300
 identifier_name:
   allowed_symbols: "_"
+  min_length: 2
